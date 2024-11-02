@@ -1,42 +1,42 @@
 import React from 'react';
-import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 
-export default function CameraControls({ toggleCameraFacing, handleRecording, recording, scaleAnim }) {
+export default function CameraControls({ isCapturing, onStartCapture, onStopCapture }) {
   return (
-    <View style={styles.controls}>
-      <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
-        <Text style={styles.text}>Flip Camera</Text>
+    <View style={styles.container}>
+      <TouchableOpacity
+        style={[styles.button, isCapturing ? styles.stopButton : styles.startButton]}
+        onPress={isCapturing ? onStopCapture : onStartCapture}
+      >
+        <Text style={styles.buttonText}>
+          {isCapturing ? 'Stop Capture' : 'Start Capture'}
+        </Text>
       </TouchableOpacity>
-      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-        <TouchableOpacity style={styles.recordButton} onPress={handleRecording}>
-          <Text style={styles.text}>{recording ? 'Stop Recording' : 'Start Recording'}</Text>
-        </TouchableOpacity>
-      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  controls: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  container: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    padding: 20,
   },
-  flipButton: {
-    marginHorizontal: 20,
-    backgroundColor:'dodgerblue',
-    padding:15,
-    borderRadius:5,
-  },
-  recordButton: {
-    backgroundColor: 'dodgerblue',
-    borderRadius: 5,
+  button: {
     padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
   },
-  text: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'black',
+  startButton: {
+    backgroundColor: '#4CAF50',
+  },
+  stopButton: {
+    backgroundColor: '#f44336',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
   },
 });

@@ -1,19 +1,16 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      <Image
-        source={{uri:'../assets/images/cctv.png'}}
-        style={styles.image}
-        resizeMode="contain"
-      />
-      <Text style={styles.title}>Traffic Eye</Text>
-      <Text style={styles.description}>Monitor and analyze traffic congestion in real-time.</Text>
-      <View style={styles.buttonContainer}>
-        <Button title="Open Camera" onPress={() => navigation.navigate('Camera')} />
-      </View>
+      <Text style={styles.title}>Image Capture App</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate('Camera')}
+      >
+        <Text style={styles.buttonText}>Start Capture</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -21,27 +18,22 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-between', // Space items evenly with button at the bottom
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 20, // Optional: Add padding
-  },
-  image: {
-    width: '100%',
-    height: 200,
-    marginBottom: 20,
+    backgroundColor: '#F5FCFF',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  description: {
-    fontSize: 16,
+    fontSize: 20,
     textAlign: 'center',
-    marginBottom: 20,
+    margin: 10,
   },
-  buttonContainer: {
-    marginTop: 'auto', // Push the button container to the bottom
-    marginBottom: 20, // Optional: Add some margin at the bottom
+  button: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
   },
 });
