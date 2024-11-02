@@ -1,20 +1,24 @@
-import * as FileSystem from 'expo-file-system';
+// import axios from 'axios';
+// import { API_URL } from 'react-native-dotenv';
 
-const API_URL = 'https://your-backend-api-url.com/upload';
+// export const sendImageForPrediction = async (imageUri) => {
+//   try {
+//     const formData = new FormData();
+//     formData.append('file', {
+//       uri: imageUri,
+//       name: imageUri.split('/').pop(),
+//       type: 'image/jpeg',
+//     });
 
-export const sendImageToBackend = async (imageUri) => {
-  try {
-    const response = await FileSystem.uploadAsync(API_URL, imageUri, {
-      httpMethod: 'POST',
-      uploadType: FileSystem.FileSystemUploadType.MULTIPART,
-      fieldName: 'image',
-    });
+//     const response = await axios.post(`${API_URL}/predict-image`, formData, {
+//       headers: {
+//         'Content-Type': 'multipart/form-data',
+//       },
+//     });
 
-    const result = JSON.parse(response.body);
-    console.log('Image uploaded successfully:', result);
-    return result;
-  } catch (error) {
-    console.error('Error uploading image:', error);
-    throw error;
-  }
-};
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error sending image for prediction:', error.message);
+//     throw error;
+//   }
+// };

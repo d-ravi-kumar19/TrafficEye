@@ -1,15 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
 export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Image Capture App</Text>
+      {/* <Image source={require('../assets/logo.png')} style={styles.logo} />  */}
+      <Text style={styles.title}>Traffic Eye</Text>
+      
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate('Camera')}
       >
-        <Text style={styles.buttonText}>Start Capture</Text>
+        <Text style={styles.buttonText}>Open Camera</Text> 
       </TouchableOpacity>
     </View>
   );
@@ -18,22 +20,31 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#F5FCFF',
+    alignItems: 'center',
+  },
+  logo: {
+    width: 100,    // Adjust width as needed
+    height: 100,   // Adjust height as needed
+    marginTop: 50, // Spacing from the top of the screen
+    marginBottom: 20,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     textAlign: 'center',
-    margin: 10,
+    margin: 20,
   },
   button: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    borderRadius: 5,
+    position: 'absolute',
+    bottom: 40,       // Position button at the bottom
+    backgroundColor: 'dodgerblue', // Use a more prominent color for "Record"
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 25,
   },
   buttonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });

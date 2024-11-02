@@ -1,24 +1,88 @@
+// app/components/CameraComponent.js
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Animated, Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import * as FileSystem from 'expo-file-system'; // Import the file system
-import RecordingIndicator from './RecordingIndicator';
-import CameraControls from './CameraControls';
+import * as FileSystem from 'expo-file-system';
+import { MaterialIcons } from '@expo/vector-icons'; // For back arrow icon
+import CameraControls from './CameraControls'; // Importing the new CameraControls component
 
 export default function CameraComponent({ navigation, aspectRatio }) {
   const [facing, setFacing] = useState('back');
-  const [permission, requestPermission] = useCameraPermissions();
-  const [recording, setRecording] = useState(false);
-  const [recordDuration, setRecordDuration] = useState(100);
+  const [permission, requestPermission] = useCameraPermissions({ audio: false });
   const cameraRef = useRef(null);
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const [isRecording, setIsRecording] = useState(false);
+  const [imageCaptureInterval, setImageCaptureInterval] = useState(null);
+  const [recordDuration, setRecordDuration] = useState(0);
 
-  // Check for camera permission
+  useEffect(() => {
+    if (!permission) {
+      requestPermission();
+    }
+  }, [permission]);
+
+  const toggleCameraFacing = () => {
+    setFacing(current => (current === 'back' ? 'front' : 'back'));
+  };
+
+  const startImageCapture = () => {
+    if (cameraRef.current) {
+      setIsRecording(true);
+      const interval = setInterval(async () => {
+        try {
+          const photo = await cameraRef.current.takePictureAsync({ skipProcessing: true });
+          const savedImageUri = await saveImageToLocal(photo.uri);
+          console.log(`Image saved at: ${savedImageUri}`);
+          setRecordDuration(prev => prev + 1);
+        } catch (error) {
+          console.error('Image Capture Error:', error);
+        }
+      }, 2000);
+
+      setImageCaptureInterval(interval);
+    }
+  };
+
+  const stopImageCapture = () => {
+    if (imageCaptureInterval) {
+      clearInterval(imageCaptureInterval);
+      setImageCaptureInterval(null);
+      setIsRecording(false);
+      setRecordDuration(0);
+    }
+  };
+
+  const handleRecording = () => {
+    if (isRecording) {
+      stopImageCapture();
+    } else {
+      startImageCapture();
+    }
+  };
+
+  const saveImageToLocal = async (uri) => {
+    const fileName = uri.split('/').pop();
+    const localUri = `${FileSystem.documentDirectory}captured_images/${fileName}`;
+    await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'captured_images', { intermediates: true });
+    await FileSystem.moveAsync({
+      from: uri,
+      to: localUri,
+    });
+    return localUri;
+  };
+
+
+  useEffect(() => {
+    return () => {
+      stopImageCapture();
+    };
+  }, []);
+
   if (!permission) {
     return <View />;
   }
 
-  // Request permission if not granted
   if (!permission.granted) {
     return (
       <View style={styles.container}>
@@ -30,111 +94,19 @@ export default function CameraComponent({ navigation, aspectRatio }) {
     );
   }
 
-  // Toggle between front and back camera
-  function toggleCameraFacing() {
-    setFacing(current => (current === 'back' ? 'front' : 'back'));
-  }
-
-  async function handleRecording() {
-    console.log('enter')
-
-  try {
-    if (recording) {
-      // If already recording, stop the recording
-      console.log('recording was on')
-      setRecording(false);
-      if (cameraRef.current) {
-        await cameraRef.current.stopRecording();
-      }
-      scaleAnim.setValue(1); // Reset button scale
-      setRecordDuration(0);
-    } else {
-      // Start recording
-      setRecording(true);
-      console.log('recording starts')
-      if (cameraRef.current) {
-        // Start recording
-        const recordingData = await cameraRef.current.recordAsync();
-        console.log('Recording started:', recordingData);
-        // Optional: Delay before stopping
-        setTimeout(async () => {
-          await cameraRef.current.stopRecording();
-          console.log('Recording stopped');
-        }, 1000); // Delay for 1 second or adjust as necessary
-      }
-
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(scaleAnim, {
-            toValue: 1.1,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-      startDurationTimer();
-      startImageCapture(); // Start capturing images every second
-    }
-  } catch (error) {
-    console.error('Recording Error:', error);
-  }
-}
-
-  // Start a timer to track recording duration
-  function startDurationTimer() {
-    setRecordDuration(0);
-    const interval = setInterval(() => {
-      setRecordDuration(prev => prev + 1);
-    }, 1000);
-    return () => clearInterval(interval); // Clear interval on component unmount
-  }
-
-  // Function to capture image every second
-  const startImageCapture = () => {
-    const captureInterval = setInterval(async () => {
-      if (cameraRef.current) {
-        try {
-          const photo = await cameraRef.current.takePictureAsync();
-          const savedImageUri = await saveImageToLocal(photo.uri); // Save image locally
-          console.log('Image saved to:', savedImageUri); // Log the saved image URI
-        } catch (error) {
-          console.error('Image Capture Error:', error);
-        }
-      }
-    }, 1000);
-
-    return () => clearInterval(captureInterval); // Clear interval on component unmount
-  };
-
-  // Save image to local file system
-  const saveImageToLocal = async (uri) => {
-    const fileName = uri.split('/').pop(); // Get the filename from URI
-    const localUri = FileSystem.documentDirectory + fileName; // Create a path in the document directory
-    await FileSystem.moveAsync({
-      from: uri,
-      to: localUri,
-    });
-    return localUri; // Return the new local URI
-  };
-
   return (
     <View style={styles.container}>
       <CameraView style={styles.camera} ref={cameraRef} facing={facing} ratio={aspectRatio}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
-          <Text style={styles.closeButtonText}>Close</Text>
-        </TouchableOpacity>
-        <RecordingIndicator duration={recordDuration} />
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <MaterialIcons name="arrow-back" size={24} color="white" />
+        <Text style={styles.backText}>Back</Text>
+      </TouchableOpacity>
       </CameraView>
-      
+
       <CameraControls 
         toggleCameraFacing={toggleCameraFacing} 
         handleRecording={handleRecording} 
-        recording={recording} 
+        recording={isRecording} 
         scaleAnim={scaleAnim} 
       />
     </View>
@@ -152,16 +124,16 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
   },
-  closeButton: {
+  backButton: {
     position: 'absolute',
-    top: 20,
-    left: 20,
-    backgroundColor: 'red',
+    top: 10,
     padding: 10,
-    borderRadius: 5,
+    flexDirection: 'row', // Arrange icon and text in a row
+    alignItems: 'center', // Align items vertically centered
   },
-  closeButtonText: {
-    color: 'white',
-    fontSize: 16,
+  backText: {
+    color: 'white', // Set the text color to white for better visibility
+    marginLeft: 5, // Add some space between the icon and text
   },
 });
+

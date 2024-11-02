@@ -1,42 +1,43 @@
-import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+// app/components/CameraControls.js
 
-export default function CameraControls({ isCapturing, onStartCapture, onStopCapture }) {
+import React from 'react';
+import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+export default function CameraControls({ toggleCameraFacing, handleRecording, recording }) {
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={[styles.button, isCapturing ? styles.stopButton : styles.startButton]}
-        onPress={isCapturing ? onStopCapture : onStartCapture}
-      >
-        <Text style={styles.buttonText}>
-          {isCapturing ? 'Stop Capture' : 'Start Capture'}
-        </Text>
+    <View style={styles.controls}>
+      <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
+        <Text style={styles.text}>Flip Camera</Text>
       </TouchableOpacity>
+        <TouchableOpacity style={styles.recordButton} onPress={handleRecording}>
+          <Text style={styles.text}>{recording ? 'Stop Recording' : 'Start Recording'}</Text>
+        </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    bottom: 20,
-    left: 0,
-    right: 0,
+  controls: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'linen',
+    padding: 30,
   },
-  button: {
+  flipButton: {
+    marginHorizontal: 20,
+    backgroundColor: 'dodgerblue',
     padding: 15,
     borderRadius: 5,
-    alignItems: 'center',
   },
-  startButton: {
-    backgroundColor: '#4CAF50',
+  recordButton: {
+    backgroundColor: 'dodgerblue',
+    borderRadius: 5,
+    padding: 15,
   },
-  stopButton: {
-    backgroundColor: '#f44336',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
+  text: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: 'black',
   },
 });
